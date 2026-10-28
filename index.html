@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MYSTIC RUINS // GRAMMAR QUEST</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- FontAwesome for Fantasy Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            background-color: #0b1320;
+            color: #f8fafc;
+        }
+
+        .font-fantasy {
+            font-family: 'Cinzel', serif;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Mystic Fantasy UI Panels */
+        .mystic-panel {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(234, 179, 8, 0.35);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(234, 179, 8, 0.1);
+            border-radius: 1rem;
+        }
+
+        .mystic-btn {
+            position: relative;
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.25), rgba(16, 185, 129, 0.25));
+            border: 1px solid #eab308;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #fef08a;
+        }
+
+        .mystic-btn:hover {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.5), rgba(16, 185, 129, 0.5));
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+
+        .mystic-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Touch Controls */
+        .touch-zone {
+            position: absolute;
+            bottom: 25px;
+            z-index: 20;
+        }
+
+        #joystick-container {
+            left: 25px;
+            width: 120px;
+            height: 120px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 2px solid rgba(234, 179, 8, 0.4);
+            border-radius: 50%;
+            touch-action: none;
+            backdrop-filter: blur(8px);
+        }
+
+        #joystick-knob {
+            width: 48px;
+            height: 48px;
+            background: radial-gradient(circle, #facc15, #ca8a04);
+            border: 2px solid #fef08a;
+            border-radius: 50%;
+            position: absolute;
+            top: 34px;
+            left: 34px;
+            pointer-events: none;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.8);
+        }
+
+        #interact-btn {
+            right: 25px;
+            width: 85px;
+            height: 85px;
+            background: radial-gradient(circle, #10b981, #047857);
+            border: 2px solid #a7f3d0;
+            border-radius: 50%;
+            color: white;
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+            font-size: 11px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        /* Mini Map Canvas */
+        #minimap-canvas {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(234, 179, 8, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(234, 179, 8, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 select-none">
+
+    <!-- 3D Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- START SCREEN OVERLAY -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="mystic-panel max-w-xl w-full p-6 md:p-8 relative overflow-hidden text-center">
+            
+            <div class="flex items-center justify-center gap-2 mb-2">
+                <i class="fa-solid fa-scroll text-2xl text-amber-400"></i>
+                <span class="text-xs font-fantasy tracking-widest text-emerald-400 uppercase">ACADEMIC TESL ADVENTURE</span>
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-black font-fantasy text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 to-yellow-400 mb-2 tracking-wider">
+                MYSTIC RUINS
+            </h1>
+            <p class="font-fantasy text-xs text-amber-200 tracking-widest mb-6 uppercase">
+                // GRAMMAR EXPLORER QUEST //
+            </p>
+
+            <div class="bg-slate-900/90 rounded-xl p-4 text-xs text-emerald-200/90 mb-6 border border-amber-500/30 text-left space-y-2">
+                <div class="text-amber-400 font-bold font-fantasy border-b border-amber-500/30 pb-2 mb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-book-bookmark mr-2"></i>MISSION OBJECTIVE:</span>
+                    <span class="text-[10px] text-emerald-400">TESL INTEGRATION</span>
+                </div>
+                <p>• Explore the ancient sunlit ruins & awaken 3 magical Runes.</p>
+                <p>• Master <span class="text-yellow-300 font-semibold">Subject-Verb Agreement</span>, <span class="text-yellow-300 font-semibold">Past Tense Verbs</span>, & <span class="text-yellow-300 font-semibold">Grammar Detection</span>.</p>
+                <p>• Clear the ancient barriers to escape the forest realm!</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-6 text-xs text-slate-300 text-left">
+                <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                    <div class="text-amber-400 font-bold mb-1 font-fantasy"><i class="fa-solid fa-keyboard mr-1"></i> DESKTOP CONTROLS</div>
+                    <div>WASD / Arrows = Move</div>
+                    <div>Mouse Drag = Rotate View</div>
+                    <div>[E] or Space = Interact</div>
+                </div>
+                <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                    <div class="text-emerald-400 font-bold mb-1 font-fantasy"><i class="fa-solid fa-mobile-screen mr-1"></i> MOBILE CONTROLS</div>
+                    <div>Left Stick = Move</div>
+                    <div>Right Drag = Rotate View</div>
+                    <div>Tap [TOUCH] = Interact</div>
+                </div>
+            </div>
+
+            <button id="start-btn" onclick="startGame()" class="mystic-btn w-full py-4 rounded-xl text-sm font-fantasy">
+                <i class="fa-solid fa-compass mr-2"></i> ENTER THE MYSTIC RUINS
+            </button>
+        </div>
+    </div>
+
+    <!-- HUD OVERLAY -->
+    <div id="hud" class="fixed top-4 left-4 right-4 z-20 flex justify-between items-start pointer-events-none hidden">
+        <!-- Objective Panel -->
+        <div class="mystic-panel px-4 py-3 pointer-events-auto max-w-xs md:max-w-sm">
+            <div class="text-[10px] font-fantasy uppercase font-bold text-amber-400 tracking-widest mb-1 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                ACTIVE QUEST
+            </div>
+            <div id="objective-text" class="text-xs md:text-sm font-medium text-slate-100">
+                Find Altar 01: SVA Rune Altar
+            </div>
+        </div>
+
+        <!-- Right Side HUD: Runes + Radar MiniMap -->
+        <div class="flex flex-col items-end gap-3 pointer-events-auto">
+            <!-- Minimap -->
+            <canvas id="minimap-canvas" width="110" height="110"></canvas>
+
+            <!-- Key Runes Status -->
+            <div class="mystic-panel px-3 py-2 flex items-center gap-3">
+                <span class="text-[10px] font-fantasy uppercase text-amber-300">RUNES:</span>
+                <div class="flex items-center gap-2 text-xs font-fantasy">
+                    <div id="chip-1" class="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-500"><i class="fa-solid fa-gem"></i> SVA</div>
+                    <div id="chip-2" class="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-500"><i class="fa-solid fa-gem"></i> PAST</div>
+                    <div id="chip-3" class="px-2 py-1 bg-slate-900 border border-slate-700 rounded-lg text-slate-500"><i class="fa-solid fa-gem"></i> GATE</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERACTION PROMPT -->
+    <div id="interaction-prompt" class="fixed bottom-28 left-1/2 -translate-x-1/2 z-20 mystic-panel px-6 py-2.5 text-amber-300 text-xs font-fantasy hidden pointer-events-none animate-bounce flex items-center gap-2">
+        <i class="fa-solid fa-hand-sparkles text-amber-400 text-sm"></i> PRESS [E] OR TAP INTERACT TO COMMUNE WITH ALTAR
+    </div>
+
+    <!-- TOUCH CONTROLS (MOBILE) -->
+    <div id="touch-controls" class="hidden">
+        <div id="joystick-container" class="touch-zone">
+            <div id="joystick-knob"></div>
+        </div>
+        <button id="interact-btn" class="touch-zone">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            <span>COMMUNE</span>
+        </button>
+    </div>
+
+    <!-- QUESTION MODAL -->
+    <div id="question-modal" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md hidden">
+        <div class="mystic-panel max-w-lg w-full p-6 relative">
+            <div class="flex justify-between items-center mb-4 border-b border-amber-500/30 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-feather-pointed text-amber-400"></i>
+                    <span id="modal-station-title" class="text-xs font-fantasy font-bold uppercase text-amber-300 tracking-wider">
+                        ANCIENT RUNE COMMUNION
+                    </span>
+                </div>
+                <span id="attempt-badge" class="text-[11px] font-mono px-2 py-0.5 bg-slate-900 border border-amber-500/40 text-amber-300 rounded">ATTEMPT: 1</span>
+            </div>
+            
+            <p id="modal-question" class="text-sm md:text-base font-semibold text-slate-100 mb-5 leading-relaxed bg-slate-900/80 p-4 rounded-xl border border-slate-700">
+                Question prompt loading...
+            </p>
+
+            <!-- Options Container -->
+            <div id="modal-options" class="space-y-2.5 mb-5 font-sans">
+                <!-- Dynamically Generated -->
+            </div>
+
+            <!-- Meta-cognitive Confidence Selector -->
+            <div id="confidence-box" class="mb-5 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                <div class="text-[10px] font-fantasy text-amber-300/80 uppercase tracking-widest mb-2"><i class="fa-solid fa-gauge-high mr-1"></i> Confidence Rating:</div>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <button onclick="setConfidence('High')" class="conf-btn p-2 rounded-lg border border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-950/50">100% Sure</button>
+                    <button onclick="setConfidence('Medium')" class="conf-btn p-2 rounded-lg border border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-950/50">Fairly Sure</button>
+                    <button onclick="setConfidence('Low')" class="conf-btn p-2 rounded-lg border border-slate-700 text-slate-300 hover:border-amber-400 bg-slate-950/50">Just Guessing</button>
+                </div>
+            </div>
+
+            <!-- Feedback Display -->
+            <div id="modal-feedback" class="p-3 rounded-lg text-xs hidden mb-4"></div>
+
+            <div class="flex justify-end">
+                <button id="close-modal-btn" onclick="closeModal()" class="mystic-btn px-4 py-2 text-xs text-slate-300 hidden">
+                    LEAVE ALTAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WIN SCREEN OVERLAY -->
+    <div id="win-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-xl hidden">
+        <div class="mystic-panel max-w-xl w-full p-8 text-center">
+            <div class="w-20 h-20 bg-amber-500/20 text-amber-300 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-400/50 shadow-lg shadow-amber-500/20 animate-pulse">
+                <i class="fa-solid fa-award text-4xl"></i>
+            </div>
+
+            <h1 class="text-3xl font-black font-fantasy text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-emerald-300 to-yellow-400 mb-1 tracking-wider">
+                RUINS CLEARED!
+            </h1>
+            <p class="text-slate-300 text-xs font-fantasy tracking-widest mb-6 text-amber-200">
+                GRAMMAR QUEST COMPLETE
+            </p>
+
+            <!-- Performance Dashboard -->
+            <div class="bg-slate-900/90 rounded-xl p-4 text-left text-xs text-slate-200 mb-6 space-y-3 border border-slate-700/80">
+                <div class="font-bold font-fantasy text-amber-400 text-sm border-b border-slate-700 pb-2 flex justify-between">
+                    <span>🎓 TESL PERFORMANCE METRICS</span>
+                    <span class="text-emerald-400">MASTERY LEVEL: HIGH</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Subject-Verb Agreement (SVA):</span>
+                    <span id="summary-sva" class="font-bold text-emerald-400">PASSED</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Irregular Past Tense Verbs:</span>
+                    <span id="summary-past" class="font-bold text-emerald-400">PASSED</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>Grammatical Error Detection:</span>
+                    <span id="summary-error" class="font-bold text-emerald-400">PASSED</span>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-800 pt-2 text-slate-400">
+                    <span>Total Attempts:</span>
+                    <span id="summary-attempts" class="font-bold text-white">3</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-400">
+                    <span>Average Confidence Level:</span>
+                    <span id="summary-confidence" class="font-bold text-amber-300">HIGH</span>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="mystic-btn w-full py-4 text-amber-300 font-fantasy text-sm rounded-xl">
+                <i class="fa-solid fa-rotate-right mr-2"></i> RESTART QUEST
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME LOGIC -->
+    <script>
+        // --- AUDIO SYNTHESIZER ---
+        class CyberAudio {
+            constructor() {
+                this.ctx = null;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e){}
+            }
+            sfxSuccess() {
+                this.playTone(523.25, 'sine', 0.15, 0.15);
+                setTimeout(() => this.playTone(659.25, 'sine', 0.15, 0.15), 120);
+                setTimeout(() => this.playTone(783.99, 'triangle', 0.3, 0.2), 240);
+            }
+            sfxFail() {
+                this.playTone(220, 'sawtooth', 0.15, 0.15);
+                setTimeout(() => this.playTone(164.81, 'sawtooth', 0.25, 0.15), 120);
+            }
+            sfxInteract() {
+                this.playTone(659.25, 'sine', 0.1, 0.1);
+            }
+            sfxUnlock() {
+                this.playTone(392.00, 'triangle', 0.2, 0.15);
+                setTimeout(() => this.playTone(523.25, 'triangle', 0.4, 0.2), 150);
+            }
+        }
+        const audioFx = new CyberAudio();
+
+        // --- GAME STATE ---
+        const gameState = {
+            started: false,
+            keys: { chip1: false, chip2: false, chip3: false },
+            doorsUnlocked: { laser1: false, laser2: false, mainGate: false },
+            attempts: { station1: 0, station2: 0, station3: 0 },
+            confidence: { station1: 'High', station2: 'High', station3: 'High' },
+            currentStation: null,
+            isFrozen: true
+        };
+
+        // --- TESL QUESTION BANK ---
+        const questions = {
+            station1: {
+                title: "ALTAR 01 // SUBJECT-VERB AGREEMENT",
+                question: "Choose the grammatically CORRECT verb to awaken the rune:\n\n'The group of young explorers _____ currently studying the ancient inscriptions.'",
+                options: [
+                    { text: "A) are", correct: false },
+                    { text: "B) is", correct: true },
+                    { text: "C) were", correct: false },
+                    { text: "D) have", correct: false }
+                ],
+                feedback: "Correct! 'The group' is a collective noun acting as a singular subject, taking the verb 'is'.",
+                hint: "Focus on the main subject head noun ('group'), not the plural noun in the prepositional phrase ('explorers')."
+            },
+            station2: {
+                title: "ALTAR 02 // PAST TENSE RUNE",
+                question: "Select the correct irregular past tense verb form:\n\n'Yesterday, the ancient golem _____ through the stone barrier.'",
+                options: [
+                    { text: "A) breaked", correct: false },
+                    { text: "B) broke", correct: true },
+                    { text: "C) broken", correct: false },
+                    { text: "D) breaks", correct: false }
+                ],
+                feedback: "Wonderful! 'Broke' is the past simple form of the irregular verb 'break'.",
+                hint: "Identify past simple action marker 'Yesterday'. The irregular verb 'break' becomes 'broke'."
+            },
+            station3: {
+                title: "ALTAR 03 // ERROR DETECTION RUNE",
+                question: "Identify the sentence that contains NO grammatical errors:",
+                options: [
+                    { text: "A) She don't like exploring late at night.", correct: false },
+                    { text: "B) Neither of the magical guards are awake.", correct: false },
+                    { text: "C) Every scholar was instructed to enter the ruins.", correct: true },
+                    { text: "D) He have completed the ancient trial.", correct: false }
+                ],
+                feedback: "Gate Awakened! 'Every scholar was...' is correct because 'Every' takes a singular verb.",
+                hint: "'Every' is singular and requires 'was'. Option A needs 'doesn't', B needs 'is', D needs 'has'."
+            }
+        };
+
+        // --- THREE.JS GLOBALS ---
+        let scene, camera, renderer;
+        let player, playerCore, companionOrb;
+        let walls = [];
+        let laserGates = {};
+        let interactables = {};
+        let bridgeMesh;
+        let particlesSystem;
+        let animatedElements = [];
+
+        // Controls State
+        const keysPressed = {};
+        let touchStartPos = { x: 0, y: 0 };
+        let cameraAngleX = 0;
+        let cameraAngleY = 0.35;
+        let joystickVector = { x: 0, y: 0 };
+
+        // --- INIT THREE.JS ENGINE ---
+        function initEngine() {
+            const container = document.getElementById('game-container');
+
+            scene = new THREE.Scene();
+            // Bright & Ambient Sunset/Forest Atmosphere
+            scene.background = new THREE.Color(0x1e293b);
+            scene.fog = new THREE.FogExp2(0x1e293b, 0.02);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Bright Sunset & Forest Lighting
+            const ambientLight = new THREE.AmbientLight(0xfef08a, 0.8);
+            scene.add(ambientLight);
+
+            const sunLight = new THREE.DirectionalLight(0xfde047, 1.2);
+            sunLight.position.set(25, 45, 20);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            scene.add(sunLight);
+
+            // Magical Point Lights (Gold & Emerald Braziers)
+            addBrazierLight(0, 3, -10, 0xfac115);
+            addBrazierLight(0, 3, -35, 0x10b981);
+            addBrazierLight(0, 3, -65, 0x3b82f6);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function addBrazierLight(x, y, z, colorHex) {
+            const light = new THREE.PointLight(colorHex, 2, 20);
+            light.position.set(x, y, z);
+            scene.add(light);
+
+            // Brazier Pillar Model
+            const pillarGeom = new THREE.CylinderGeometry(0.3, 0.4, 2, 8);
+            const pillarMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 });
+            const pillar = new THREE.Mesh(pillarGeom, pillarMat);
+            pillar.position.set(x, 1, z);
+            scene.add(pillar);
+
+            // Glowing Crystal Flame
+            const flameGeom = new THREE.OctahedronGeometry(0.35, 0);
+            const flameMat = new THREE.MeshBasicMaterial({ color: colorHex });
+            const flame = new THREE.Mesh(flameGeom, flameMat);
+            flame.position.set(x, 2.3, z);
+            scene.add(flame);
+
+            animatedElements.push({ mesh: flame, speed: 0.02, initialY: 2.3 });
+        }
+
+        // --- MYSTIC RUINS MAP CREATION ---
+        function setupCyberEnvironment() {
+            // Materials
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7, metalness: 0.2 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9, metalness: 0.1 });
+            const trimMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, metalness: 0.8 });
+
+            // Grass & Ancient Stone Floor
+            const floorGeom = new THREE.PlaneGeometry(60, 100);
+            const floor = new THREE.Mesh(floorGeom, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.set(0, 0, -35);
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Glowing Runic Grid Lines
+            const grid = new THREE.GridHelper(100, 40, 0xeab308, 0x334155);
+            grid.position.set(0, 0.01, -35);
+            scene.add(grid);
+
+            // WALL BUILDING HELPER (Mossy Stone Walls with Pillar Trims)
+            function buildWall(x, z, w, d) {
+                const wallGeom = new THREE.BoxGeometry(w, 5, d);
+                const wall = new THREE.Mesh(wallGeom, wallMat);
+                wall.position.set(x, 2.5, z);
+                wall.castShadow = true;
+                wall.receiveShadow = true;
+                scene.add(wall);
+                walls.push(new THREE.Box3().setFromObject(wall));
+
+                // Decorative Gold Border Top
+                const trimGeom = new THREE.BoxGeometry(w > d ? w : 0.3, 0.2, d > w ? d : 0.3);
+                const trim = new THREE.Mesh(trimGeom, trimMat);
+                trim.position.set(x, 5.1, z);
+                scene.add(trim);
+            }
+
+            // Outer Boundary Walls
+            buildWall(-15, -35, 1, 100);
+            buildWall(15, -35, 1, 100);
+            buildWall(0, 15, 30, 1);
+            buildWall(0, -85, 30, 1);
+
+            // Corridor Inner Walls
+            buildWall(-7, -15, 15, 1);
+            buildWall(7, -25, 15, 1);
+
+            // CREATE RUNIC BARRIER GATES
+            laserGates.gate1 = createLaserGate(0, -20, 0xeab308);
+            laserGates.gate2 = createLaserGate(0, -50, 0x10b981);
+            laserGates.mainGate = createLaserGate(0, -75, 0x3b82f6);
+
+            // MYSTICAL RAVINE / CHASM
+            const pitGeom = new THREE.PlaneGeometry(30, 12);
+            const pitMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+            const pit = new THREE.Mesh(pitGeom, pitMat);
+            pit.rotation.x = -Math.PI / 2;
+            pit.position.set(0, -0.05, -40);
+            scene.add(pit);
+
+            // Holographic Crystal Bridge Mesh (Initially Lowered)
+            const bridgeGeom = new THREE.BoxGeometry(8, 0.4, 12);
+            const bridgeMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, opacity: 0.85, transparent: true });
+            bridgeMesh = new THREE.Mesh(bridgeGeom, bridgeMat);
+            bridgeMesh.position.set(0, -3, -40);
+            scene.add(bridgeMesh);
+
+            // --- UPGRADED AVATAR: ARCANE EXPLORER GOLEM ---
+            player = new THREE.Group();
+
+            // Golem Body
+            const bodyGeom = new THREE.CylinderGeometry(0.55, 0.4, 1.3, 12);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4, metalness: 0.6 });
+            const playerBody = new THREE.Mesh(bodyGeom, bodyMat);
+            playerBody.position.y = 1.1;
+            playerBody.castShadow = true;
+            player.add(playerBody);
+
+            // Glowing Arcane Chest Core
+            const coreGeom = new THREE.OctahedronGeometry(0.25, 0);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            playerCore = new THREE.Mesh(coreGeom, coreMat);
+            playerCore.position.set(0, 1.2, -0.35);
+            player.add(playerCore);
+
+            // Golem Head
+            const headGeom = new THREE.BoxGeometry(0.5, 0.4, 0.5);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3 });
+            const head = new THREE.Mesh(headGeom, headMat);
+            head.position.set(0, 1.9, 0);
+            player.add(head);
+
+            // Visor Eye
+            const visorGeom = new THREE.BoxGeometry(0.4, 0.1, 0.1);
+            const visorMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+            const visor = new THREE.Mesh(visorGeom, visorMat);
+            visor.position.set(0, 1.95, -0.26);
+            player.add(visor);
+
+            // Floating Companion Orb ("Wispy")
+            const orbGeom = new THREE.SphereGeometry(0.18, 12, 12);
+            const orbMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+            companionOrb = new THREE.Mesh(orbGeom, orbMat);
+            companionOrb.position.set(0.8, 2.2, 0);
+            player.add(companionOrb);
+
+            player.position.set(0, 0, 5);
+            scene.add(player);
+
+            // INTERACTIVE RUNIC ALTARS
+            interactables.station1 = createRuneAltar(-10, -10, "SVA RUNE", 0xeab308, 'station1');
+            interactables.station2 = createRuneAltar(6, -33, "PAST RUNE", 0x10b981, 'station2');
+            interactables.station3 = createRuneAltar(0, -70, "GATE RUNE", 0x3b82f6, 'station3');
+
+            // Ambient Floating Golden Fireflies / Pollen
+            createCyberParticles();
+        }
+
+        function createLaserGate(x, z, colorHex) {
+            const group = new THREE.Group();
+            group.position.set(x, 0, z);
+
+            // Stone Posts
+            const postGeom = new THREE.BoxGeometry(1, 5.5, 1);
+            const postMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+            const p1 = new THREE.Mesh(postGeom, postMat); p1.position.set(-4, 2.75, 0);
+            const p2 = new THREE.Mesh(postGeom, postMat); p2.position.set(4, 2.75, 0);
+            group.add(p1); group.add(p2);
+
+            // Glowing Runic Barrier Beams
+            const beams = [];
+            for (let i = 0; i < 4; i++) {
+                const beamGeom = new THREE.CylinderGeometry(0.1, 0.1, 8, 8);
+                const beamMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.8 });
+                const beam = new THREE.Mesh(beamGeom, beamMat);
+                beam.rotation.z = Math.PI / 2;
+                beam.position.set(0, 1.2 + i * 1.0, 0);
+                group.add(beam);
+                beams.push(beam);
+            }
+
+            scene.add(group);
+
+            // Collision Box
+            const box = new THREE.Box3().setFromCenterAndSize(
+                new THREE.Vector3(x, 2.5, z),
+                new THREE.Vector3(8, 5, 1)
+            );
+            walls.push(box);
+
+            return { group, box, beams };
+        }
+
+        function createRuneAltar(x, z, label, colorHex, stationKey) {
+            const altarGroup = new THREE.Group();
+            altarGroup.position.set(x, 0, z);
+
+            // Altar Stone Pedestal
+            const baseGeom = new THREE.CylinderGeometry(0.9, 1.2, 1.2, 8);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+            const base = new THREE.Mesh(baseGeom, baseMat);
+            base.position.y = 0.6;
+            altarGroup.add(base);
+
+            // Floating Arcane Gem
+            const gemGeom = new THREE.OctahedronGeometry(0.5, 0);
+            const gemMat = new THREE.MeshBasicMaterial({ color: colorHex });
+            const gem = new THREE.Mesh(gemGeom, gemMat);
+            gem.position.set(0, 2.0, 0);
+            altarGroup.add(gem);
+
+            scene.add(altarGroup);
+            animatedElements.push({ mesh: gem, speed: 0.03, initialY: 2.0 });
+
+            return { mesh: altarGroup, station: stationKey, radius: 2.8 };
+        }
+
+        function createCyberParticles() {
+            const count = 150;
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+
+            for (let i = 0; i < count * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 50;
+                positions[i + 1] = Math.random() * 8;
+                positions[i + 2] = (Math.random() - 0.5) * 90 - 30;
+            }
+
+            geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const mat = new THREE.PointsMaterial({ size: 0.15, color: 0xfde047, transparent: true, opacity: 0.7 });
+            particlesSystem = new THREE.Points(geom, mat);
+            scene.add(particlesSystem);
+        }
+
+        // --- CONTROLS & EVENTS ---
+        function setupControls() {
+            // Keyboard
+            window.addEventListener('keydown', (e) => {
+                keysPressed[e.code] = true;
+                if ((e.code === 'KeyE' || e.code === 'Space') && gameState.started && !gameState.isFrozen) {
+                    checkInteractions();
+                }
+            });
+            window.addEventListener('keyup', (e) => keysPressed[e.code] = false);
+
+            // Mouse Look Drag
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            window.addEventListener('mousedown', (e) => {
+                if (e.button === 0 && e.target.tagName === 'CANVAS') {
+                    isDragging = true;
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                    audioFx.init();
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging || gameState.isFrozen) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                cameraAngleX -= deltaX * 0.005;
+                cameraAngleY = Math.max(0.1, Math.min(1.2, cameraAngleY + deltaY * 0.005));
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mouseup', () => isDragging = false);
+
+            // Touch Joystick Setup
+            setupTouchControls();
+        }
+
+        function setupTouchControls() {
+            const joystickContainer = document.getElementById('joystick-container');
+            const joystickKnob = document.getElementById('joystick-knob');
+            const interactBtn = document.getElementById('interact-btn');
+
+            let touchId = null;
+
+            joystickContainer.addEventListener('touchstart', (e) => {
+                audioFx.init();
+                const touch = e.changedTouches[0];
+                touchId = touch.identifier;
+                const rect = joystickContainer.getBoundingClientRect();
+                touchStartPos = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            });
+
+            window.addEventListener('touchmove', (e) => {
+                if (gameState.isFrozen) return;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    if (touch.identifier === touchId) {
+                        const distP = { x: touch.clientX - touchStartPos.x, y: touch.clientY - touchStartPos.y };
+                        const maxDist = 38;
+                        const dist = Math.hypot(distP.x, distP.y);
+                        const angle = Math.atan2(distP.y, distP.x);
+
+                        const clampedDist = Math.min(dist, maxDist);
+                        const knobX = Math.cos(angle) * clampedDist;
+                        const knobY = Math.sin(angle) * clampedDist;
+
+                        joystickKnob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+                        joystickVector = { x: knobX / maxDist, y: knobY / maxDist };
+                    }
+                }
+            });
+
+            const resetJoystick = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        touchId = null;
+                        joystickKnob.style.transform = 'translate(0px, 0px)';
+                        joystickVector = { x: 0, y: 0 };
+                    }
+                }
+            };
+
+            window.addEventListener('touchend', resetJoystick);
+            window.addEventListener('touchcancel', resetJoystick);
+
+            interactBtn.addEventListener('click', () => {
+                if (gameState.started && !gameState.isFrozen) {
+                    audioFx.sfxInteract();
+                    checkInteractions();
+                }
+            });
+        }
+
+        function detectMobileDevice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+            if (isMobile) {
+                document.getElementById('touch-controls').classList.remove('hidden');
+            }
+        }
+
+        // --- START GAME ---
+        function startGame() {
+            audioFx.init();
+            audioFx.sfxSuccess();
+
+            initEngine();
+            setupCyberEnvironment();
+            setupControls();
+            detectMobileDevice();
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+
+            gameState.started = true;
+            gameState.isFrozen = false;
+
+            animate();
+        }
+
+        // --- MAIN GAME LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameState.started && !gameState.isFrozen) {
+                handleMovement();
+                checkPitFall();
+                updateCamera();
+                checkProximityPrompts();
+                updateAnimations();
+                drawMinimap();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function handleMovement() {
+            let moveX = 0;
+            let moveZ = 0;
+
+            if (keysPressed['KeyW'] || keysPressed['ArrowUp']) moveZ -= 1;
+            if (keysPressed['KeyS'] || keysPressed['ArrowDown']) moveZ += 1;
+            if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) moveX -= 1;
+            if (keysPressed['KeyD'] || keysPressed['ArrowRight']) moveX += 1;
+
+            if (Math.abs(joystickVector.x) > 0.1 || Math.abs(joystickVector.y) > 0.1) {
+                moveX = joystickVector.x;
+                moveZ = joystickVector.y;
+            }
+
+            if (moveX !== 0 || moveZ !== 0) {
+                const moveVec = new THREE.Vector3(moveX, 0, moveZ).normalize();
+                moveVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngleX);
+
+                const speed = 0.16;
+                const nextPos = player.position.clone().addScaledVector(moveVec, speed);
+
+                // Collision Detection
+                const playerBox = new THREE.Box3().setFromCenterAndSize(
+                    nextPos.clone().add(new THREE.Vector3(0, 1, 0)),
+                    new THREE.Vector3(0.8, 1.8, 0.8)
+                );
+
+                let collided = false;
+                for (let wallBox of walls) {
+                    if (playerBox.intersectsBox(wallBox)) {
+                        collided = true;
+                        break;
+                    }
+                }
+
+                if (!collided) {
+                    player.position.copy(nextPos);
+                }
+
+                player.rotation.y = Math.atan2(moveVec.x, moveVec.z);
+            }
+        }
+
+        function updateCamera() {
+            const dist = 7.5;
+            camera.position.x = player.position.x + dist * Math.sin(cameraAngleX) * Math.cos(cameraAngleY);
+            camera.position.y = player.position.y + dist * Math.sin(cameraAngleY) + 1.2;
+            camera.position.z = player.position.z + dist * Math.cos(cameraAngleX) * Math.cos(cameraAngleY);
+            camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
+        }
+
+        function checkPitFall() {
+            if (player.position.z < -35 && player.position.z > -45) {
+                if (!gameState.doorsUnlocked.laser2) {
+                    audioFx.sfxFail();
+                    player.position.set(0, 0, -25); // Safe Respawn
+                }
+            }
+
+            if (player.position.z < -78) {
+                triggerWinScreen();
+            }
+        }
+
+        function updateAnimations() {
+            const time = Date.now() * 0.003;
+
+            // Animate Floating Elements
+            animatedElements.forEach(item => {
+                item.mesh.position.y = item.initialY + Math.sin(time * 2) * 0.15;
+                item.mesh.rotation.y += item.speed;
+            });
+
+            // Animate Companion Orb ("Wispy")
+            if (companionOrb) {
+                companionOrb.position.y = 2.2 + Math.sin(time * 3) * 0.2;
+                companionOrb.position.x = 0.8 + Math.cos(time * 2) * 0.1;
+            }
+
+            // Animate Core Crystal Glow
+            if (playerCore) {
+                playerCore.rotation.y += 0.02;
+            }
+
+            if (particlesSystem) {
+                particlesSystem.rotation.y += 0.0008;
+            }
+        }
+
+        // --- INTERACTION SYSTEM ---
+        function checkProximityPrompts() {
+            let nearAny = false;
+            const prompt = document.getElementById('interaction-prompt');
+
+            for (let id in interactables) {
+                const item = interactables[id];
+                const dist = player.position.distanceTo(item.mesh.position);
+
+                if (dist < item.radius) {
+                    nearAny = true;
+                    prompt.classList.remove('hidden');
+                    break;
+                }
+            }
+
+            if (!nearAny) {
+                prompt.classList.add('hidden');
+            }
+        }
+
+        function checkInteractions() {
+            for (let id in interactables) {
+                const item = interactables[id];
+                const dist = player.position.distanceTo(item.mesh.position);
+
+                if (dist < item.radius) {
+                    openChallengeModal(item.station);
+                    break;
+                }
+            }
+        }
+
+        // --- TESL QUESTION MODAL LOGIC ---
+        function openChallengeModal(stationKey) {
+            gameState.currentStation = stationKey;
+            gameState.isFrozen = true;
+            gameState.attempts[stationKey]++;
+
+            const qData = questions[stationKey];
+            document.getElementById('modal-station-title').innerText = qData.title;
+            document.getElementById('attempt-badge').innerText = `ATTEMPT: ${gameState.attempts[stationKey]}`;
+            document.getElementById('modal-question').innerText = qData.question;
+
+            const optionsContainer = document.getElementById('modal-options');
+            optionsContainer.innerHTML = '';
+
+            const feedbackEl = document.getElementById('modal-feedback');
+            feedbackEl.classList.add('hidden');
+
+            qData.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3.5 bg-slate-900/90 hover:bg-amber-950/60 text-left rounded-xl border border-slate-700 hover:border-amber-400 text-xs font-semibold text-slate-200 transition active:scale-[0.99]";
+                btn.innerText = opt.text;
+                btn.onclick = () => processAnswer(opt.correct, qData);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('question-modal').classList.remove('hidden');
+        }
+
+        function setConfidence(level) {
+            if (gameState.currentStation) {
+                gameState.confidence[gameState.currentStation] = level;
+            }
+            document.querySelectorAll('.conf-btn').forEach(btn => btn.classList.remove('border-amber-400', 'bg-amber-950/50'));
+            event.target.classList.add('border-amber-400', 'bg-amber-950/50');
+            audioFx.sfxInteract();
+        }
+
+        function processAnswer(isCorrect, qData) {
+            const feedbackEl = document.getElementById('modal-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                audioFx.sfxSuccess();
+                feedbackEl.className = "p-3 rounded-lg text-xs bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 mb-4";
+                feedbackEl.innerText = `✨ RUNE AWAKENED: ${qData.feedback}`;
+
+                handleStationSuccess(gameState.currentStation);
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1800);
+            } else {
+                audioFx.sfxFail();
+                feedbackEl.className = "p-3 rounded-lg text-xs bg-rose-950/80 text-rose-300 border border-rose-500/50 mb-4";
+                feedbackEl.innerText = `❌ RUNE DORMANT. ANCIENT HINT: ${qData.hint}`;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('question-modal').classList.add('hidden');
+            gameState.isFrozen = false;
+        }
+
+        // --- REWARDS & BARRIER UNLOCKS ---
+        function handleStationSuccess(stationKey) {
+            audioFx.sfxUnlock();
+
+            if (stationKey === 'station1') {
+                gameState.keys.chip1 = true;
+                const c1 = document.getElementById('chip-1');
+                c1.className = "px-2 py-1 bg-amber-950 border border-amber-400 rounded-lg text-amber-300 font-bold";
+
+                removeWallCollision(laserGates.gate1.box);
+                scene.remove(laserGates.gate1.group);
+                gameState.doorsUnlocked.laser1 = true;
+
+                document.getElementById('objective-text').innerText = "Proceed to Sector B: Awaken Altar 02 for Crystal Bridge";
+            } 
+            else if (stationKey === 'station2') {
+                gameState.keys.chip2 = true;
+                const c2 = document.getElementById('chip-2');
+                c2.className = "px-2 py-1 bg-emerald-950 border border-emerald-400 rounded-lg text-emerald-300 font-bold";
+
+                bridgeMesh.position.y = 0; // Raise Crystal Bridge
+
+                removeWallCollision(laserGates.gate2.box);
+                scene.remove(laserGates.gate2.group);
+                gameState.doorsUnlocked.laser2 = true;
+
+                document.getElementById('objective-text').innerText = "Cross Crystal Bridge: Awaken Altar 03 to unlock Final Gate";
+            } 
+            else if (stationKey === 'station3') {
+                gameState.keys.chip3 = true;
+                const c3 = document.getElementById('chip-3');
+                c3.className = "px-2 py-1 bg-sky-950 border border-sky-400 rounded-lg text-sky-300 font-bold";
+
+                removeWallCollision(laserGates.mainGate.box);
+                scene.remove(laserGates.mainGate.group);
+                gameState.doorsUnlocked.mainGate = true;
+
+                document.getElementById('objective-text').innerText = "FINAL GATE UNLOCKED! Step into the portal to ESCAPE!";
+            }
+        }
+
+        function removeWallCollision(box) {
+            walls = walls.filter(w => w !== box);
+        }
+
+        // --- MINI-MAP RADAR DRAWING ---
+        function drawMinimap() {
+            const canvas = document.getElementById('minimap-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const mapScale = 1.1;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Draw Player Marker
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Altars
+            for (let key in interactables) {
+                const pos = interactables[key].mesh.position;
+                const relX = (pos.x - player.position.x) * mapScale;
+                const relZ = (pos.z - player.position.z) * mapScale;
+
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(centerX + relX, centerY + relZ, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // --- WIN SCREEN & SUMMARY ---
+        function triggerWinScreen() {
+            gameState.isFrozen = true;
+            document.getElementById('hud').classList.add('hidden');
+
+            const totalAttempts = gameState.attempts.station1 + gameState.attempts.station2 + gameState.attempts.station3;
+            document.getElementById('summary-attempts').innerText = totalAttempts;
+
+            document.getElementById('win-screen').classList.remove('hidden');
+            audioFx.sfxSuccess();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
